@@ -76,7 +76,9 @@ python scripts/cli_chat.py
 
 ---
 
-## 🤝 Contributing
-Read **`HANDOVER_AND_ROADMAP.md`** for the developer guide. Code must be production-grade, modular, and 100% free.
+## ⚖️ Legal Disclaimer
+This project is for **PERSONAL USE ONLY**. 
+The scrapers included (JobSpy, Direct Scrapers) are intended for educational purposes and personal job searching.
+**To Job Boards & Platforms**: If this tool inadvertently violates any Terms & Conditions, please accept my apologies. This is not a commercial product. Contact me at my email (in profile) for immediate remediation or removal of specific modules.
 
 **Maintainers**: Saumya Patel & Cyno Agent.
