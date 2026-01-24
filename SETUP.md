@@ -62,7 +62,10 @@ For high-precision Resume Parsing (OCR) and Smart Email generation, we use Googl
         COLAB_SERVER_URL=https://your-ngrok-url-here.ngrok-free.app
         ```
 
-*(If you skip this, the agent will run in "Local Mode" which is slower but still works for searching).*
+## 🔒 Security Warning (Critical)
+1.  **Never Upload Keys**: Keep your API keys in `.env` or `credentials_setup.env`.
+2.  **Git Ignore**: The system is pre-configured to ignore `.env`, `credentials_setup.env`, and `google_token.json`. Do not force add them.
+3.  **Local Only**: If you create new key files, add them to `.gitignore` immediately.
 
 ---
 
