@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="1.623" timestamp="2026-01-03T00:16:22.505138" hostname="Saumya"><testcase classname="" name="tests.test_models" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\saumy\OneDrive\Desktop\job\job-agent-production\tests\test_models.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+venv\Lib\site-packages\pydantic\networks.py:364: in import_email_validator
+    import email_validator
+E   ModuleNotFoundError: No module named 'email_validator'
+
+The above exception was the direct cause of the following exception:
+..\..\..\..\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_models.py:10: in &lt;module&gt;
+    from models import Resume, Job, Session, EmailDraft
+models.py:137: in &lt;module&gt;
+    class EmailDraft(BaseModel):
+venv\Lib\site-packages\pydantic\_internal\_model_construction.py:183: in __new__
+    complete_model_class(
+venv\Lib\site-packages\pydantic\_internal\_model_construction.py:517: in complete_model_class
+    schema = cls.__get_pydantic_core_schema__(cls, handler)
+venv\Lib\site-packages\pydantic\main.py:584: in __get_pydantic_core_schema__
+    return __handler(__source)
+venv\Lib\site-packages\pydantic\_internal\_schema_generation_shared.py:82: in __call__
+    schema = self._handler(__source_type)
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:501: in generate_schema
+    schema = self._generate_schema(obj)
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:739: in _generate_schema
+    schema = self._post_process_generated_schema(self._generate_schema_inner(obj))
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:761: in _generate_schema_inner
+    return self._model_schema(obj)
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:574: in _model_schema
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:574: in &lt;dictcomp&gt;
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:925: in _generate_md_field_schema
+    common_field = self._common_field_schema(name, field_info, decorators)
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:1047: in _common_field_schema
+    schema = self._apply_annotations(
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:1749: in _apply_annotations
+    schema = get_inner_schema(source_type)
+venv\Lib\site-packages\pydantic\_internal\_schema_generation_shared.py:82: in __call__
+    schema = self._handler(__source_type)
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:1728: in inner_handler
+    from_property = self._generate_schema_from_property(obj, obj)
+venv\Lib\site-packages\pydantic\_internal\_generate_schema.py:649: in _generate_schema_from_property
+    schema = get_schema(
+venv\Lib\site-packages\pydantic\networks.py:404: in __get_pydantic_core_schema__
+    import_email_validator()
+venv\Lib\site-packages\pydantic\networks.py:366: in import_email_validator
+    raise ImportError('email-validator is not installed, run `pip install pydantic[email]`') from e
+E   ImportError: email-validator is not installed, run `pip install pydantic[email]`</error></testcase></testsuite></testsuites>

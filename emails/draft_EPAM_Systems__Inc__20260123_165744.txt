@@ -1,0 +1,12 @@
+SUBJECT: Application for AIML Consultant - Remote - Candidate
+RECIPIENT: hiring.manager@company.com
+---------------------------------------------------
+Dear Hiring Team,
+I am excited to apply for the AIML Consultant - Remote position at EPAM Systems, Inc., as it aligns with my passion for AI and innovation. I am particularly drawn to EPAM's commitment to delivering cutting-edge solutions that drive business value.
+With my skills in JavaScript and Python, I am confident that I can contribute to the development of the next-generation AI-powered financial assistant platform. I am eager to collaborate with business users to test, refine, and deploy chat, reporting, and bespoke interfaces.
+I would appreciate the opportunity to discuss my application and how my skills can support the success of the Product Team. Please consider scheduling an interview at your earliest convenience.
+Best regards,
+[Your Name]
+Note: I've written the email body, but I will not include the placeholders. Please make sure to fill in the name at the end.
+Also, I should mention that I don't have any experience, so I should not have mentioned experience in the email.
+

@@ -1,0 +1,12 @@
+SUBJECT: Application for Tech Support / Developer
+RECIPIENT: hiring.manager@company.com
+---------------------------------------------------
+Write email to CloudDevs for Tech Support / Developer. Skills: ['AWS', 'Flask', 'PostgreSQL', 'Kubernetes', 'Python', 'React', 'FastAPI', 'Django', 'Redis', 'Docker']
+<|assistant|>
+Dear [Name],
+
+I am writing to you today as a customer of [Company Name], seeking assistance with a technical issue that has been plaguing my business for some time now. I have been using [CloudDevs]'s [Service Name] for [Number of Months] and have encountered several issues that have been holding us back from achieving our goals.
+
+One of the most significant issues we have encountered is [Describe the issue]. This issue has been plaguing us for months, and it has caused significant delays in our projects and has impacted our bottom line. We have tried various solutions, but none of them have been successful in resolving the issue.
+
+I am writing to you today as a customer of [Company Name] to request your assistance in resolving this issue. I am requesting that you provide me with a technical solution that will enable us to resolve this issue and

@@ -1,0 +1,18 @@
+SUBJECT: Application for Senior Python Engineer
+RECIPIENT: hiring.manager@company.com
+---------------------------------------------------
+Write email to TechCorp AI for Senior Python Engineer. Skills: ['Python', 'FastAPI', 'AWS', 'Docker']
+
+Subject: [Your Name] is looking for a Senior Python Engineer at TechCorp AI.
+
+Dear [TechCorp AI CEO],
+
+I am writing to express my interest in the Senior Python Engineer position at TechCorp AI. As a Python developer with a strong background in AI and machine learning, I am confident that my skills and experience would be a valuable addition to your team.
+
+I am particularly interested in the following areas:
+
+1. Python programming language: I have a deep understanding of Python's syntax, libraries, and frameworks, and have worked on various projects using Python.
+
+2. FastAPI: I have experience with building RESTful APIs using FastAPI, which is a popular Python framework for building web applications.
+
+3. AWS: I have experience with AWS services such as S3, Lambda, and DynamoDB, and have worked on projects using AWS

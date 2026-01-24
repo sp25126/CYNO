@@ -1,0 +1,63 @@
+{
+  "summary": {
+    "total": 9,
+    "passed": 9,
+    "failed": 0
+  },
+  "results": [
+    {
+      "name": "test_01_empty_file",
+      "status": "PASS",
+      "duration": 5.130173900000045,
+      "error": null
+    },
+    {
+      "name": "test_05_text_renamed_as_pdf",
+      "status": "PASS",
+      "duration": 0.06283369999982824,
+      "error": null
+    },
+    {
+      "name": "test_12_sql_injection_in_name",
+      "status": "PASS",
+      "duration": 0.005050699999628705,
+      "error": null
+    },
+    {
+      "name": "test_36_extremely_long_name",
+      "status": "PASS",
+      "duration": 0.0037960999998176703,
+      "error": null
+    },
+    {
+      "name": "test_52_rate_limit_backoff",
+      "status": "PASS",
+      "duration": 1.7276645000001736,
+      "error": null
+    },
+    {
+      "name": "test_56_connection_timeout",
+      "status": "PASS",
+      "duration": 1.3842422999996415,
+      "error": null
+    },
+    {
+      "name": "test_51_forbidden_block",
+      "status": "PASS",
+      "duration": 1.980615499999658,
+      "error": null
+    },
+    {
+      "name": "test_salary_parsing_garbage",
+      "status": "PASS",
+      "duration": 0.0003209999995306134,
+      "error": null
+    },
+    {
+      "name": "test_empty_job_description",
+      "status": "PASS",
+      "duration": 0.0002248999999210355,
+      "error": null
+    }
+  ]
+}

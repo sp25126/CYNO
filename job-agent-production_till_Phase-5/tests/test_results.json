@@ -1,0 +1,7 @@
+{
+    "test_resume_valid_parsing": "failed",
+    "test_resume_invalid_years": "failed",
+    "test_job_url_validation": "failed",
+    "test_session_message_persistence": "failed",
+    "test_email_draft_sanitization": "failed"
+}

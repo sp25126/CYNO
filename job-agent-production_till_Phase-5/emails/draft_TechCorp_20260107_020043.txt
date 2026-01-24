@@ -1,0 +1,14 @@
+SUBJECT: AI Engineer Expertise for TechCorp's Cutting-Edge Projects
+RECIPIENT: hiring.manager@company.com
+STATUS: DRAFT
+---------------------------------------------------
+Dear Hiring Manager, 
+
+I am writing to express my strong interest in the AI Engineer position at TechCorp. With 3 years of experience specializing in Python and TensorFlow development, I believe my skills align perfectly with your requirements.  My expertise in building robust machine learning models and deploying them into production environments would be a valuable asset to your team.
+
+TechCorp's commitment to innovation and its reputation for developing groundbreaking AI solutions truly excites me. I am eager to contribute my technical abilities and passion for the field to help drive your company's success. 
+
+I have attached my resume for your review and welcome the opportunity to discuss how my skills can benefit TechCorp.  
+
+Sincerely,
+[Your Name]
