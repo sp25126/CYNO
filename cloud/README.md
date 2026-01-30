@@ -20,15 +20,15 @@ This guide explains how to deploy the Cyno Resume Parser on Google Colab's free 
 Paste this into the first cell and run:
 
 ```python
-# Clone repository (if needed) or upload colab_server.py directly
-!wget https://raw.githubusercontent.com/<YOUR_REPO>/job-agent-production/cloud/colab_server.py
+# Clone repository (if needed) or upload UNIVERSAL_GPU_SERVER.py directly
+!wget https://raw.githubusercontent.com/<YOUR_REPO>/job-agent-production/cloud/UNIVERSAL_GPU_SERVER.py
 
 # Run server
-from colab_server import start_server
+from UNIVERSAL_GPU_SERVER import start_server
 start_server()  # Uses free ngrok tier
 ```
 
-**Alternative:** Copy-paste the entire contents of `cloud/colab_server.py` into a cell and run.
+**Alternative:** Copy-paste the entire contents of `cloud/UNIVERSAL_GPU_SERVER.py` into a cell and run.
 
 ### 1.4 Get Public URL
 After 2-3 minutes, you'll see:

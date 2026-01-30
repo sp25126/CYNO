@@ -82,6 +82,38 @@ class JobSearchTool:
             self.logger.error(f"JobSpy Failed: {e}")
             return []
 
+    def search_reddit(self, query: str, limit: int = 15) -> List[Job]:
+        """
+        Scrapes Reddit using PRAW.
+        """
+        results = []
+        try:
+            if not self.reddit:
+                self.logger.warning("Reddit credentials missing. Skipping.")
+                return []
+                
+            subreddits = "+".join(DEFAULT_SUBREDDITS)
+            self.logger.info(f"Scanning subreddits: {subreddits[:50]}...")
+            
+            # Search in subreddits
+            for post in self.reddit.subreddit(subreddits).search(query, sort='new', time_filter='month', limit=limit):
+                # Basic filter: Title must look like a job
+                if any(x in post.title.lower() for x in ['hiring', 'looking for', 'job', 'role', 'developer', 'engineer', 'remote']):
+                    results.append(Job(
+                        title=post.title[:100],
+                        company=f"Reddit ({post.subreddit.display_name})",
+                        location="Remote",
+                        job_url=post.url,
+                        apply_url=post.url,
+                        description=post.selftext[:500] if post.selftext else post.title,
+                        source=f"Reddit (r/{post.subreddit.display_name})",
+                        date_posted=datetime.fromtimestamp(post.created_utc).strftime('%Y-%m-%d')
+                    ))
+        except Exception as e:
+            self.logger.error(f"Reddit PRAW failed: {e}")
+            
+        return results
+
     def search_hackernews(self, query: str, limit: int = 15) -> List[Dict]:
         """
         Scrapes Hacker News 'Who is Hiring' threads using RequestManager.
@@ -424,14 +456,19 @@ class JobSearchTool:
         self.logger.info(f"Direct scraping total: {len(all_jobs)} jobs")
         return all_jobs
 
-    async def run_all(self, query: str, limit: int = 20) -> List[Job]:
+    async def run_all(self, query: str, limit: int = 150) -> List[Job]:
         """
         Master Aggregator: JobSpy + Reddit + PDF Sites (Hybrid)
         """
-        from tools.job_lists import PDF_DOMAINS_TOP, STARTUP_INTL, STARTUP_INDIA, INTERNSHIPS
+        from tools.job_lists import REMOTE_BOARDS, STARTUP_SITES, INTERNSHIP_SITES, FREELANCE_SITES, INDIA_SITES
         from tools.site_search import SiteSearchTool
         
         all_jobs = []
+        
+        # Dynamic limit that can be boosted if earlier steps fail
+        current_limit = limit 
+        # Target ~40% of total limit per section, minimum 40
+        per_section_limit = max(40, int(current_limit * 0.4))
         
         # 1. JobSpy (Major Boards)
         self.logger.info("Step 1/3: Checking Major Boards (LinkedIn, Indeed, Glassdoor)...")
@@ -439,14 +476,13 @@ class JobSearchTool:
         if "india" in query.lower(): loc = "India"
         
         try:
-            # We add google and zip_recruiter
-            # Removing 'google' as it often returns generic search pages
+            # We add zip_recruiter (removed simply_hired to fix errors)
             jobs_spy = scrape_jobs(
-                site_name=["indeed", "linkedin", "glassdoor"],
+                site_name=["indeed", "linkedin", "glassdoor", "zip_recruiter"],
                 search_term=query,
                 location=loc,
-                results_wanted=10, 
-                country_indeed='India' if loc == 'India' else 'USA'
+                results_wanted=per_section_limit, 
+                country_indeed='USA' 
             )
             if not jobs_spy.empty:
                 for _, j in jobs_spy.iterrows():
@@ -461,11 +497,23 @@ class JobSearchTool:
                         date_posted=str(j.get("date_posted", "Recent"))
                     ))
         except Exception as e:
-            self.logger.error(f"JobSpy Error: {e}")
+            self.logger.error(f"JobSpy Failed: {e}. BOOSTING DOWNSTREAM SCRAPER LIMITS.")
+            # Critical Fallback: Double the load on other scrapers
+            per_section_limit = per_section_limit * 2 
             
+        # 1.5. Reddit Scraper (Restored & Enhanced)
+        self.logger.info("Step 1.5/8: Checking Reddit Communities...")
+        try:
+            reddit_jobs = self.search_reddit(query, limit=per_section_limit)
+            for r in reddit_jobs:
+                all_jobs.append(r)
+            self.logger.info(f"Reddit found {len(reddit_jobs)} postings")
+        except Exception as e:
+            self.logger.warning(f"Reddit scrape failed: {e}")
+
         # 2. Hacker News (Community)
         self.logger.info("Step 2/3: Checking Hacker News Community...")
-        hn_jobs = self.search_hackernews(query, limit=15)
+        hn_jobs = self.search_hackernews(query, limit=per_section_limit)
         for r in hn_jobs:
             all_jobs.append(Job(
                 title=r['title'],
@@ -484,10 +532,10 @@ class JobSearchTool:
             from tools.direct_scrapers import DirectScrapers
             direct = DirectScrapers()
             direct_jobs = []
-            direct_jobs.extend(direct.scrape_weworkremotely(query, limit=10))
-            direct_jobs.extend(direct.scrape_remoteok(query, limit=10))
-            direct_jobs.extend(direct.scrape_remotive(query, limit=10))
-            direct_jobs.extend(direct.scrape_himalayas(query, limit=10))
+            direct_jobs.extend(direct.scrape_weworkremotely(query, limit=per_section_limit)) 
+            direct_jobs.extend(direct.scrape_remoteok(query, limit=per_section_limit))
+            direct_jobs.extend(direct.scrape_remotive(query, limit=per_section_limit))
+            direct_jobs.extend(direct.scrape_himalayas(query, limit=per_section_limit))
             
             for job in direct_jobs:
                 all_jobs.append(job)
@@ -502,7 +550,7 @@ class JobSearchTool:
             try:
                 from tools.freelance_scrapers import FreelanceScrapers
                 freelance = FreelanceScrapers()
-                freelance_jobs = freelance.scrape_all(query, limit_per_site=10)
+                freelance_jobs = freelance.scrape_all(query, limit_per_site=per_section_limit) 
                 
                 for job in freelance_jobs:
                     all_jobs.append(job)
@@ -516,7 +564,7 @@ class JobSearchTool:
         try:
             from tools.extended_job_scrapers import ExtendedJobScrapers
             extended = ExtendedJobScrapers()
-            extended_jobs = extended.scrape_all(query, limit_per_site=10)
+            extended_jobs = extended.scrape_all(query, limit_per_site=per_section_limit) 
             
             for job in extended_jobs:
                 all_jobs.append(job)
@@ -530,7 +578,7 @@ class JobSearchTool:
         try:
             from tools.more_scrapers import MoreScrapers
             more = MoreScrapers()
-            more_jobs = more.scrape_all(query, limit=10)
+            more_jobs = more.scrape_all(query, limit=per_section_limit) 
             
             for job in more_jobs:
                 all_jobs.append(job)
@@ -538,42 +586,52 @@ class JobSearchTool:
             self.logger.info(f"More scrapers: {len(more_jobs)} jobs")
         except Exception as e:
             self.logger.error(f"More scrapers failed: {e}")
-
-        # 6.5. DISABLED - DuckDuckGo returns search pages, not job links
-        # Uncomment for broader coverage at cost of precision
-        # self.logger.info("Step 6.5/8: DuckDuckGo Job Search...")
+            
+        # 7. DISABLED MASSIVE SCAN (Botched by Rate Limits) - Use Direct Instead
+        # self.logger.info("Step 7/8: Deep Scanning 100+ Dedicated Sites (Hybrid Mode)...")
         # try:
-        #     ddg_jobs = self.search_ddg_pdfs(query, limit=15)
-        #     for r in ddg_jobs:
-        #         all_jobs.append(Job(
-        #             title=r.get('title', 'Unknown'),
-        #             company=r.get('company', 'Various'),
-        #             location=r.get('location', 'Remote'),
-        #             job_url=r.get('url', ''),
-        #             apply_url=r.get('url', ''),
-        #             description=r.get('description', 'No description'),
-        #             source='DuckDuckGo',
-        #             date_posted="Recent"
-        #         ))
-        #     self.logger.info(f"DDGS: {len(ddg_jobs)} results")
-        # except Exception as e:
-        #     self.logger.error(f"DDGS search failed: {e}")
+        #      # ... (Code intentionally disabled to favor direct volume)
+            from tools.site_search import SiteSearchTool
+            from tools.job_lists import REMOTE_BOARDS, STARTUP_SITES, INTERNSHIP_SITES, FREELANCE_SITES, INDIA_SITES
+            
+            hybrid_tool = SiteSearchTool()
+            target_domains = []
+            
+            # Smart Domain Selection
+            low_query = query.lower()
+            
+            # Always check core remote boards
+            target_domains.extend(REMOTE_BOARDS)
+            
+            # Conditional Additions
+            if "intern" in low_query:
+                self.logger.info("   -> Including Internship Boards")
+                target_domains.extend(INTERNSHIP_SITES)
+            
+            if "freelance" in low_query or "contract" in low_query or "project" in low_query:
+                self.logger.info("   -> Including Freelance Platforms")
+                target_domains.extend(FREELANCE_SITES)
+                
+            if "india" in low_query:
+                self.logger.info("   -> Including India-Specific Sites")
+                target_domains.extend(INDIA_SITES)
+            else:
+                # If not explicitly India, add startup sites (often global/US)
+                target_domains.extend(STARTUP_SITES)
 
-        # 7. DISABLED - Hybrid Site Search returns search result pages, not job links
-        # Keeping only precise sources (JobSpy, Direct BS4, APIs)
-        # Uncomment if you want broader coverage at the cost of precision
-        # self.logger.info("Step 7/8: Deep Scanning 500+ Dedicated Sites (Hybrid Mode)...")
-        # hybrid_tool = SiteSearchTool()
-        # target_domains = PDF_DOMAINS_TOP
-        # if "india" in query.lower() or "startup" in query.lower():
-        #     target_domains += STARTUP_INDIA
-        # if "intern" in query.lower():
-        #     target_domains += INTERNSHIPS
-        # if "abroad" in query.lower() or "global" in query.lower():
-        #     target_domains += STARTUP_INTL
-        # hybrid_jobs = hybrid_tool.search_domains(query, target_domains)
-        # all_jobs.extend(hybrid_jobs)
-        
+            # Execution
+            # We target ~5 results per domain to maximize volume (buffer for failures)
+            # 100 sites * 5 results = 500 possible results
+            hybrid_jobs = hybrid_tool.search_domains(query, target_domains, limit_per_domain=5)
+            
+            for job in hybrid_jobs:
+                all_jobs.append(job)
+                
+            self.logger.info(f"Hybrid scan contributed {len(hybrid_jobs)} jobs")
+            
+        except Exception as e:
+            self.logger.error(f"Hybrid site scan failed: {e}")
+            
         self.logger.info(f"Total jobs collected: {len(all_jobs)} (all with direct job links)")
 
         # Deduplicate by URL

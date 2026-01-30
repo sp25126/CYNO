@@ -14,61 +14,74 @@ class SiteSearchTool:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
 
-    def search_domains(self, query: str, domains: List[str], limit_per_domain: int = 2) -> List[Job]:
+    def search_domains(self, query: str, domains: List[str], limit_per_domain: int = 5) -> List[Job]:
         """
-        Meta-search loop: For each domain, run `site:domain.com {query}` via DDGS.
+        Massive scan of specific domains using DuckDuckGo.
+        Efficiently groups domains into OR queries to stay within API limits.
         """
         results = []
-        self.logger.info(f"Hybrid Search: Scanning {len(domains)} domains for '{query}'...")
+        import time
+        from duckduckgo_search import DDGS
         
-        # We can't hit 500 domains in one go without being banned or taking forever.
-        # Strategy: Randomly sample 20 domains OR search relevant ones.
-        # For now, we will query them in batches or use a unified "site:A OR site:B" query if query length permits.
+        # Chunk domains to avoid query too long errors (e.g. 3 at a time)
+        # Using 3 per batch is safer for DDG API limits
+        chunk_size = 3
+        domain_chunks = [domains[i:i + chunk_size] for i in range(0, len(domains), chunk_size)]
         
-        # Better Strategy: Combined Query for groups of 10 domains
-        # "python job (site:a.com OR site:b.com OR ...)"
-        
-        chunk_size = 10
-        chunks = [domains[i:i + chunk_size] for i in range(0, len(domains), chunk_size)]
-        
-        # Limit total batches to avoid 5 min search
-        max_batches = 5 
+        self.logger.info(f"Hybrid Search: Scanning {len(domains)} sites in {len(domain_chunks)} batches...")
         
         with DDGS() as ddgs:
-            count = 0
-            for chunk in chunks[:max_batches]:
-                site_query = " OR ".join([f"site:{d}" for d in chunk])
-                full_query = f"{query} ({site_query})"
-                
+            for i, chunk in enumerate(domain_chunks):
                 try:
-                    # search
-                    gen = ddgs.text(full_query, region='us-en', max_results=10)
-                    if gen:
-                        for r in gen:
-                            title = r.get('title', 'Unknown Role')
-                            link = r.get('href', '')
-                            snippet = r.get('body', '')
-                            
-                            # Simple filter: Link must look like a job
-                            if any(k in link.lower() for k in ["job", "career", "legacy", "openings", "apply", "work"]):
+                    site_query = " OR ".join([f"site:{d}" for d in chunk])
+                    full_query = f"{query} ({site_query})"
+                    
+                    # We want enough results to cover the chunk
+                    max_res = limit_per_domain * len(chunk)
+                    
+                    # Exponential backoff retry
+                    for attempt in range(3):
+                        try:
+                            ddg_gen = ddgs.text(full_query, region='us-en', max_results=max_res)
+                            if ddg_gen:
+                                found_in_batch = 0
+                                for r in ddg_gen:
+                                    url = r.get('href', '')
+                                    # Basic verification it belongs to one of our sites
+                                    if any(d in url for d in chunk):
+                                        
+                                        # Deduce company/source from URL
+                                        source_domain = "Unknown"
+                                        for d in chunk:
+                                            if d in url:
+                                                source_domain = d
+                                                break
+                                        
+                                        results.append(Job(
+                                            title=r.get('title', 'Unknown Role'),
+                                            company=source_domain.split('.')[0].capitalize(),
+                                            location="Remote / Listed",
+                                            job_url=url,
+                                            apply_url=url,
+                                            description=r.get('body', '')[:500],
+                                            source=f"Direct ({source_domain})",
+                                            date_posted="Recent"
+                                        ))
+                                        found_in_batch += 1
                                 
-                                # Try to extract Company from domain
-                                domain = link.split('/')[2].replace('www.', '')
-                                
-                                results.append(Job(
-                                    title=title,
-                                    company=domain.split('.')[0].capitalize(), # Rough guess
-                                    location="Remote (Assumed from Source)",
-                                    job_url=link,
-                                    apply_url=link,
-                                    description=f"Source: {domain}\nSnippet: {snippet}",
-                                    source=f"Direct ({domain})",
-                                    date_posted="Recent"
-                                ))
+                            break # Success
+                        except Exception as e:
+                            # 202 Ratelimits need a cooldown
+                            wait_time = 5 + (2 ** attempt)
+                            self.logger.warning(f"Batch {i+1} warning: {e}. Sleeping {wait_time}s...")
+                            time.sleep(wait_time)
+                    
+                    time.sleep(0.5) # Politeness delay
+                    
                 except Exception as e:
-                    self.logger.warning(f"Batch search failed: {e}")
-                
-        self.logger.info(f"Hybrid Search found {len(results)} raw results.")
+                    continue
+
+        self.logger.info(f"Hybrid Search found {len(results)} matches from {len(domains)} sites.")
         return results
 
     def fetch_page_details(self, url: str) -> Optional[str]:

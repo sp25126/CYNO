@@ -1,0 +1,45 @@
+{
+  "name": "Your Name",
+  "email": "your.email@example.com",
+  "phone": "+1-234-567-8900",
+  "title": "Software Engineer",
+  "years_experience": 3,
+  "summary": "Passionate software engineer with expertise in building scalable applications.",
+  "signature": "",
+  "preferred_greeting": "Hi",
+  "preferred_closing": "Best regards",
+  "preferred_tone": "professional",
+  "include_linkedin": true,
+  "include_portfolio": true,
+  "include_phone": false,
+  "linkedin_url": "https://linkedin.com/in/yourprofile",
+  "portfolio_url": "https://yourportfolio.com",
+  "github_url": "https://github.com/yourusername",
+  "top_skills": [
+    "Python",
+    "JavaScript",
+    "React",
+    "Node.js",
+    "Machine Learning"
+  ],
+  "notable_achievements": [
+    "Led development of a system that reduced processing time by 40%",
+    "Contributed to open-source project with 1000+ stars",
+    "Built an ML model that improved prediction accuracy by 25%"
+  ],
+  "project_highlights": [
+    {
+      "name": "AI Chatbot",
+      "description": "Built a conversational AI using LLMs and RAG architecture"
+    },
+    {
+      "name": "E-commerce Platform",
+      "description": "Full-stack application handling 10k+ daily transactions"
+    }
+  ],
+  "style_keywords": [
+    "results-driven",
+    "passionate",
+    "collaborative"
+  ]
+}

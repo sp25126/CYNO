@@ -60,18 +60,3 @@ env.bak/
 .vscode/
 *.sublime-project
 *.sublime-workspace
-
-# Local Data
-internships/
-freelance/
-leads/
-jobs/
-credentials_setup.env
-google_token.json
-.env.example
-
-# Artifacts
-.gemini/
-brain/
-
-job-agent-production_till_Phase-5/

@@ -1,41 +1,67 @@
-# Startup & Internship Lists
-STARTUP_INTL = [
-    "ycombinator.com/jobs", "wellfound.com", "hired.com", "otta.com", 
-    "crunchbase.com", "angel.co", "builtin.com", "techstars.com",
-    "f6s.com", "producthunt.com/jobs", "remoteok.com", "weworkremotely.com",
-    "remotive.com", "himalayas.app", "nodesk.co", "jobspresso.co",
-    "workingnomads.com", "timelyapp.com", "doist.com", "automattic.com"
-]
+"""
+MASSIVE JOB SITE LISTS (126+ TARGETS)
+Used by SiteSearchTool and JobSearchTool to ensure huge coverage.
+"""
 
-STARTUP_INDIA = [
-    "instahyre.com", "wellfound.com/location/india", "hirist.com", 
-    "cutshort.io", "bigshyft.com", "hasjob.co", "angel.co/india",
-    "yourstory.com/jobs", "cuvette.tech", "tophire.co", "xpheno.com",
-    "springrecruit.com", "keka.com/careers", "razorpay.com/jobs",
-    "zerodha.com/careers", "flipkartcareers.com", "swiggy.com/careers",
-    "zomato.com/careers", "ola.careers", "creds.com"
-]
-
-INTERNSHIPS = [
-    "internshala.com", "letsintern.com", "hellointern.com", "twenty19.com",
-    "stuMagz.com", "switchidea.com", "interntheory.com", "makeintern.com",
-    "chegg.com", "wayup.com", "handshake.com", "cielkel.com",
-    "glassdoor.co.in", "linkedin.com/jobs/internships", "indeed.com",
-    "monsterindia.com", "naukri.com", "freshersworld.com", "firstnaukri.com",
-    "youth4work.com", "internships.com", "idealist.org", "mediabistro.com",
-    "coolworks.com", "ba.com/careers", "graduateland.com", "erasmusintern.org",
-    "goabroad.com", "globalexperiences.com", "aiesec.org"
-]
-
-# Raw IDs from PDF extraction (Subset for brevity, full logic uses PDF extraction dynamically)
-PDF_DOMAINS_TOP = [
-    "weworkremotely.com", "remoteok.com", "flexjobs.com", "remotive.com",
-    "workingnomads.com", "jobspresso.co", "himalayas.app", "wellfound.com",
-    "remote.co", "justremote.co", "nodesk.co", "citizenremote.com",
+# 1. CORE REMOTE BOARDS (30)
+REMOTE_BOARDS = [
+    "weworkremotely.com", "remoteok.com", "remotive.com", "himalayas.app",
+    "jobspresso.co", "remote.co", "justremote.co", "workingnomads.com",
+    "wearedevelopers.com", "landing.jobs", "nodesk.co", "citizenremote.com",
     "jobgether.com", "pangian.com", "skipthedrive.com", "virtualvocations.com",
-    "authenticjobs.com", "dribbble.com", "behance.net", "hackerrank.com",
-    "stackoverflow.com", "landing.jobs", "gun.io", "toptal.com", "upwork.com",
-    "freelancer.com", "guru.com", "arc.dev", "codementor.io", "hired.com",
-    "vettery.com", "monster.com", "careerbuilder.com", "simplyhired.com", 
-    "ziprecruiter.com", "jooble.org", "adzuna.com", "jobisjob.com"
+    "authenticjobs.com", "dribbble.com/jobs", "behance.net/joblist",
+    "arc.dev", "gun.io", "toptal.com", "hired.com", "vettery.com",
+    "dailyremote.com", "remote.io", "outerjoin.us", "remotewoman.com", 
+    "remotely.one", "remoteweekly.cc"
 ]
+
+# 2. STARTUPS & TECH (40)
+STARTUP_SITES = [
+    "ycombinator.com/jobs", "wellfound.com", "angel.co", "startup.jobs",
+    "startupers.com", "startups.com/jobs", "techstars.com/jobs", "f6s.com",
+    "workatastartup.com", "builtin.com", "crunchboard.com", "mashable.com/jobs",
+    "techcrunch.com/jobs", "ventureloop.com", "uncubed.com", "underdog.io",
+    "betalist.com/jobs", "producthunt.com/jobs", "indiehackers.com", 
+    "dev.to/listings", "hashnode.com/jobs", "stackoverflow.com/jobs",
+    "github.com/jobs", "gitlab.com/jobs", "geekwork.com", "dice.com",
+    "icrunchdata.com", "kdnuggets.com/jobs", "analyticsvidhya.com/jobs",
+    "datasciencejobs.com", "ai-jobs.net", "python.org/jobs", "djangojobs.net",
+    "golangprojects.com", "rustjobs.com", "scala-jobs.org", "functional.works-hub.com",
+    "clojurejobboard.com", "elixirjobs.net", "rubyfs.com"
+]
+
+# 3. INTERNSHIPS (30)
+INTERNSHIP_SITES = [
+    "internships.com", "chegg.com/internships", "wayup.com", "ripplematch.com",
+    "handshake.com", "intern.supply", "looksharp.com", "internqueen.com",
+    "idealist.org", "coolworks.com", "aftercollege.com", "collegegrad.com",
+    "collegerecruiter.com", "mediabistro.com", "usajobs.gov/students",
+    "internshipfinder.com", "globalexperiences.com", "goabroad.com/intern-abroad",
+    "iie.org", "culturalvistas.org", "ciee.org", "aiesec.org",
+    "graduateland.com", "europlacement.com", "erasmusintern.org",
+    "placement-uk.com", "ratemyplacement.co.uk", "milkround.com",
+    "targetjobs.co.uk", "prospects.ac.uk"
+]
+
+# 4. FREELANCE (30)
+FREELANCE_SITES = [
+    "upwork.com", "freelancer.com", "fiverr.com", "guru.com", "peopleperhour.com",
+    "toptal.com", "99designs.com", "dribbble.com/freelance-jobs", "behance.net/job-list",
+    "servicecape.com", "designhill.com", "taskrabbit.com", "flexjobs.com",
+    "solidgigs.com", "cloudpeeps.com", "contently.com", "skyword.com",
+    "writeraccess.com", "textbroker.com", "constant-content.com", "crowdsource.com",
+    "mturk.com", "clickworker.com", "microworkers.com", "remotetasks.com",
+    "rev.com", "transcribeme.com", "gotranscript.com", "babbletype.com",
+    "verbalink.com"
+]
+
+# 5. INDIA SPECIFIC (20)
+INDIA_SITES = [
+    "naukri.com", "monsterindia.com", "timesjobs.com", "shine.com",
+    "instahyre.com", "hirist.com", "iimjobs.com", "bigshyft.com",
+    "cutshort.io", "freshersworld.com", "jobriya.in", "sarkariresult.com",
+    "freejobalert.com", "jagranjosh.com", "careerpower.in", "bankersadda.com",
+    "adda247.com", "testbook.com", "gradeup.co", "unacademy.com"
+]
+
+ALL_DOMAINS = REMOTE_BOARDS + STARTUP_SITES + INTERNSHIP_SITES + FREELANCE_SITES + INDIA_SITES
