@@ -1,0 +1,87 @@
+# ====================================
+# CYNO - AI Job Search Agent
+# .gitignore Configuration
+# ====================================
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ----- Virtual Environment -----
+venv/
+ENV/
+env/
+.venv/
+
+# ----- IDE & Editors -----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# ----- Environment & Secrets -----
+.env
+.env.local
+.env.*.local
+credentials*.env
+!credentials_template.env
+*.pem
+*.key
+secrets/
+
+# ----- Logs & Runtime Data -----
+logs/
+*.log
+.cache/
+
+# ----- User Data (Privacy) -----
+jobs/
+leads/
+internships/
+emails/
+resumes/*.pdf
+resumes/*.docx
+data/bio.txt
+data/resume.md
+data/user_prefs.json
+
+# ----- Backup & Temp Folders -----
+jobTILLUPDATION*/
+archive/
+*.bak
+*.tmp
+temp/
+
+# ----- OS Generated -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Test Artifacts -----
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
