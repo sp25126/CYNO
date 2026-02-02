@@ -1,0 +1,50 @@
+PHASE 2 COMPLETE TEST REPORT
+============================
+
+Timestamp: C:\Users\saumy\OneDrive\Desktop\job\job-agent-production\phase2_complete
+Search Query: Python Developer
+Resume Skills: Node.js, Python, NLP
+
+STATS:
+- JobSpy: 60 (Target: 10+) [PASSED]
+- Reddit: 0 (Target: 6+) [WARNING]
+- DDGS:   10   (Target: 5+) [PASSED]
+- Direct Scraping: 18
+  └─ Core Sites (WWR, RemoteOK, Remotive)
+  └─ Startup Sites (10 boards via DDGS)
+  └─ Internship Sites (10 boards via DDGS)
+  └─ International Sites (5 boards via DDGS)
+- TOTAL: 88 (Target: 150+) [✅ PASSED]
+
+🏆 BEST RANKED JOB 🏆
+Title: Sr. Software Developer
+Company: BRS
+Source: JobSpy (glassdoor)
+Relevance Score: 2
+Link: https://www.glassdoor.com/job-listing/j?jl=1009985712237
+
+Brief Description:
+Eagle Integrated Services, LLC (EIS) is seeking Software Development to support our ongoing mission at Aberdeen Proving Ground (APG), Maryland. This is a full remote role. **What You'll Do:** * Develops and maintains working software that satisfies the customers needs. * Analyzes job tasks, organizational structure and user requirements to provide system\-wide solutions. * Designs solutions based ...
+
+
+--- ALL FOUND JOBS (Top 20) ---
+1. [JobSpy (glassdoor)] Sr. Software Developer - https://www.glassdoor.com/job-listing/j?jl=1009985712237
+2. [JobSpy (glassdoor)] Staff Software Development Engineer - Full Stack - https://www.glassdoor.com/job-listing/j?jl=1009985741228
+3. [JobSpy (glassdoor)] Software Engineer – Observability, Co-op - https://www.glassdoor.com/job-listing/j?jl=1009985688746
+4. [JobSpy (glassdoor)] Full Stack Developer - https://www.glassdoor.com/job-listing/j?jl=1009985236927
+5. [JobSpy (indeed)] Software Engineer – Observability, Co-op - https://www.indeed.com/viewjob?jk=2c22d52d44263b2d
+6. [JobSpy (indeed)] Full Stack Developer - https://www.indeed.com/viewjob?jk=1e0aa8c5b53e54f7
+7. [JobSpy (indeed)] Python Developer Intern (AI / LLM / RAG) - https://www.indeed.com/viewjob?jk=ff631472880953d5
+8. [JobSpy (glassdoor)] Cybersecurity Software Engineer - https://www.glassdoor.com/job-listing/j?jl=1009986080568
+9. [JobSpy (glassdoor)] Senior Software Engineer - https://www.glassdoor.com/job-listing/j?jl=1009985827322
+10. [JobSpy (glassdoor)] Staff Software Engineer - https://www.glassdoor.com/job-listing/j?jl=1009985853601
+11. [JobSpy (glassdoor)] Senior Software Engineer - https://www.glassdoor.com/job-listing/j?jl=1009985853735
+12. [JobSpy (glassdoor)] GitLab Site Reliability Engineer (SRE) - https://www.glassdoor.com/job-listing/j?jl=1009985725103
+13. [JobSpy (glassdoor)] Automation Developer - https://www.glassdoor.com/job-listing/j?jl=1009985679385
+14. [JobSpy (glassdoor)] Product Engineer - Java Spring Boot - https://www.glassdoor.com/job-listing/j?jl=1009985839190
+15. [JobSpy (glassdoor)] Software Engineer (Contractor) - https://www.glassdoor.com/job-listing/j?jl=1009985589335
+16. [JobSpy (glassdoor)] Python Developer - https://www.glassdoor.com/job-listing/j?jl=1009985489465
+17. [JobSpy (glassdoor)] Senior Software Engineer, DIY Design Relevance - East Coast US Remote - https://www.glassdoor.com/job-listing/j?jl=1009985552420
+18. [JobSpy (glassdoor)] Sr Backend Engineer - 3D Data-CAD Automation - https://www.glassdoor.com/job-listing/j?jl=1009985868922
+19. [JobSpy (glassdoor)] Sr. Software Engineer- Developer Experience - https://www.glassdoor.com/job-listing/j?jl=1009985800722
+20. [JobSpy (glassdoor)] Software Development Engineer IV - https://www.glassdoor.com/job-listing/j?jl=1009985827332

@@ -1,0 +1,16 @@
+SUBJECT: Application for Customer Service Operations Representative (EST Timezone)
+RECIPIENT: hiring.manager@company.com
+STATUS: DRAFT
+---------------------------------------------------
+## Subject: Python & NLP Enthusiast Eager to Contribute to Curri's Growth
+
+Dear Hiring Manager, 
+
+I was excited to see your opening for a Customer Service Operations Representative at Curri.  Your focus on operational strategies and first-principles problem solving aligns perfectly with my passion for building efficient systems. 
+
+My background in Python, NLP, and Node.js allows me to approach challenges from a data-driven perspective. I'm eager to learn and contribute to a fast-paced environment like Curri's, where innovation is key.  I believe my skills could be valuable assets to your team as you strive to make every delivery a home run. 
+
+I'm confident that I can quickly adapt to the demands of this role and am excited about the opportunity to join your team. 
+
+Sincerely,
+[Your Name]

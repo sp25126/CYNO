@@ -1,0 +1,17 @@
+{
+  "acceptance_tests/resume_parser/test_resume_parser.py::test_resume_parser_advanced": true,
+  "acceptance_tests/job_search/test_job_search.py::test_job_search_ddg_mock": true,
+  "acceptance_tests/job_search/test_job_search.py::test_parsing_logic": true,
+  "acceptance_tests/job_matching/test_matching.py": true,
+  "tests/test_phase2_orchestrator.py::test_workflow_direct_search_flow": true,
+  "tests/test_phase2_orchestrator.py::test_error_recovery_no_results": true,
+  "tests/test_phase2_orchestrator.py::test_llm_routing_logic": true,
+  "tests/test_phase2_orchestrator.py::test_heuristic_routing_logic": true,
+  "tests/test_job_search_real.py::test_reddit_search_real": true,
+  "tests/test_job_search.py::test_ddg_search_real_network": true,
+  "tests/test_job_search.py::test_ddg_nonsense_query": true,
+  "tests/test_job_search.py::test_reddit_search_skipped_if_no_creds": true,
+  "tests/test_job_search.py::test_unknown_source": true,
+  "tests/test_production.py::test_resume_valid_parsing": true,
+  "tests/test_break_it.py::TestResumeChaos::test_12_sql_injection": true
+}

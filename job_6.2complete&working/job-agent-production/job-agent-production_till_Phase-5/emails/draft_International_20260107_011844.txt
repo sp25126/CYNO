@@ -1,0 +1,12 @@
+SUBJECT: Eager to Contribute Python Skills to International's Remote Projects
+RECIPIENT: hiring.manager@company.com
+STATUS: DRAFT
+---------------------------------------------------
+Dear Hiring Team, 
+
+I came across your "Remote Python Jobs" posting on r/remotepython and was immediately excited by the opportunity to contribute my skills to International.  My experience with Node.js and NLP, coupled with a strong understanding of Python development, makes me confident in my ability to deliver high-quality results for your projects. 
+
+I'm particularly drawn to International's commitment to remote work and believe my collaborative approach would be a valuable asset to your team. I'm eager to learn more about the exciting opportunities you have available.  
+
+Sincerely,
+[Your Name]

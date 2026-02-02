@@ -1,0 +1,50 @@
+Metadata-Version: 2.1
+Name: pytest-harvest
+Version: 1.4.0
+Summary: Store data created during your pytest tests execution, and retrieve it at the end of the session, e.g. for applicative benchmarking purposes.
+Home-page: https://github.com/smarie/python-pytest-harvest
+Maintainer: Sylvain MARIE
+Maintainer-email: sylvain.marie@schneider-electric.com
+License: BSD 3-Clause
+Download-URL: https://github.com/smarie/python-pytest-harvest/tarball/1.4.0
+Keywords: pytest test result store fixture collect benchmark artifact session
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Testing
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Framework :: Pytest
+Requires-Dist: decorator
+Requires-Dist: funcsigs ; python_version < "3.3"
+
+pytest-harvest
+==============
+
+|Build Status| |Tests Status| |codecov| |Documentation| |PyPI|
+
+Store data created during your ``pytest`` tests execution, and retrieve
+it at the end of the session, e.g. for applicative benchmarking
+purposes.
+
+The documentation for users is available here:
+https://smarie.github.io/python-pytest-harvest/
+
+A readme for developers is available here:
+https://github.com/smarie/python-pytest-harvest
+
+.. |Build Status| image:: https://travis-ci.org/smarie/python-pytest-harvest.svg?branch=master
+   :target: https://travis-ci.org/smarie/python-pytest-harvest
+.. |Tests Status| image:: https://smarie.github.io/python-pytest-harvest/junit/junit-badge.svg?dummy=8484744
+   :target: https://smarie.github.io/python-pytest-harvest/junit/report.html
+.. |codecov| image:: https://codecov.io/gh/smarie/python-pytest-harvest/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/smarie/python-pytest-harvest
+.. |Documentation| image:: https://img.shields.io/badge/docs-latest-blue.svg
+   :target: https://smarie.github.io/python-pytest-harvest/
+.. |PyPI| image:: https://img.shields.io/badge/PyPI-pytest_harvest-blue.svg
+   :target: https://pypi.python.org/pypi/pytest_harvest/
+
+

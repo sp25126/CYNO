@@ -1,0 +1,13 @@
+[2026-01-20 21:01:16,551] INFO - ============================================================
+[2026-01-20 21:01:16,551] INFO -   WAKE WORD DETECTOR TEST
+[2026-01-20 21:01:16,551] INFO - ============================================================
+[2026-01-20 21:01:16,551] INFO - Initializing WakeWordDetector with models: ['alexa']
+[2026-01-20 21:01:24,358] ERROR - Failed to initialize wake word model: [ONNXRuntimeError] : 3 : NO_SUCHFILE : Load model from C:\Users\saumy\AppData\Local\Programs\Python\Python311\Lib\site-packages\openwakeword\resources/models/alexa_v0.1.onnx failed:Load model C:\Users\saumy\AppData\Local\Programs\Python\Python311\Lib\site-packages\openwakeword\resources/models/alexa_v0.1.onnx failed. File doesn't exist
+[2026-01-20 21:01:24,358] INFO - Retrying in 2s... (3 attempts left)
+[2026-01-20 21:01:26,359] ERROR - Failed to initialize wake word model: Could not find pretrained model for model name 'C:\Users\saumy\AppData\Local\Programs\Python\Python311\Lib\site-packages\openwakeword\resources/models/alexa_v0.1.onnx'
+[2026-01-20 21:01:26,360] INFO - Retrying in 4s... (2 attempts left)
+[2026-01-20 21:01:30,361] ERROR - Failed to initialize wake word model: Could not find pretrained model for model name 'C:\Users\saumy\AppData\Local\Programs\Python\Python311\Lib\site-packages\openwakeword\resources/models/alexa_v0.1.onnx'
+[2026-01-20 21:01:30,361] INFO - Retrying in 6s... (1 attempts left)
+[2026-01-20 21:01:36,362] ERROR - Failed to initialize wake word model: Could not find pretrained model for model name 'C:\Users\saumy\AppData\Local\Programs\Python\Python311\Lib\site-packages\openwakeword\resources/models/alexa_v0.1.onnx'
+[2026-01-20 21:01:36,362] CRITICAL - Wake word model initialization failed after all retries
+[2026-01-20 21:01:36,362] ERROR - Test failed: Could not find pretrained model for model name 'C:\Users\saumy\AppData\Local\Programs\Python\Python311\Lib\site-packages\openwakeword\resources/models/alexa_v0.1.onnx'
