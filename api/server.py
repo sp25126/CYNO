@@ -1,6 +1,7 @@
 """
 CYNO FastAPI Backend
 Connects React frontend to the 53 AI tools via REST API
+Enhanced with professional personality engine
 """
 import os
 import sys
@@ -16,10 +17,22 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Set cloud URL from env
 os.environ.setdefault('COLAB_SERVER_URL', 'https://9b25fe231854.ngrok-free.app')
 
+# Import personality engine
+try:
+    from agent.personality import (
+        CYNO_SYSTEM_PROMPT,
+        format_professional_response,
+        analyze_resume_insights,
+        get_professional_intro
+    )
+except ImportError:
+    CYNO_SYSTEM_PROMPT = "You are CYNO, a professional AI career advisor."
+    format_professional_response = None
+
 app = FastAPI(
     title="CYNO API",
     description="AI-Powered Job Search Agent Backend",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # CORS for React frontend
@@ -35,11 +48,13 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
     context: Optional[Dict[str, Any]] = None
+    resume_text: Optional[str] = None
 
 class ChatResponse(BaseModel):
     response: str
     tool_used: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
+    insights: Optional[Dict[str, Any]] = None
 
 class JobSearchRequest(BaseModel):
     query: str
@@ -60,9 +75,11 @@ class SalaryRequest(BaseModel):
     location: str
     experience_level: str
 
+# User context storage (in-memory for prototype)
+user_contexts = {}
+
 # Initialize tools lazily
 _cloud_client = None
-_tools_initialized = False
 
 def get_cloud_client():
     global _cloud_client
@@ -75,23 +92,13 @@ def get_cloud_client():
             _cloud_client = None
     return _cloud_client
 
-def init_tools():
-    global _tools_initialized
-    if not _tools_initialized:
-        try:
-            from tools.registry import initialize_registry
-            initialize_registry()
-            _tools_initialized = True
-        except Exception as e:
-            print(f"Tool registry init error: {e}")
-
 # Routes
 @app.get("/")
 async def root():
     return {
         "service": "CYNO API",
-        "version": "1.0.0",
-        "status": "running",
+        "version": "2.0.0",
+        "personality": "Senior Career Strategist",
         "endpoints": ["/chat", "/search", "/resume", "/cover-letter", "/salary", "/health"]
     }
 
@@ -108,160 +115,241 @@ async def health_check():
     return {
         "api": "healthy",
         "cloud_brain": cloud_status,
-        "tools_initialized": _tools_initialized
+        "personality": "active"
     }
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    """Main chat endpoint - routes to appropriate tools"""
-    message = request.message.lower()
+    """Main chat endpoint with professional CYNO personality"""
+    message = request.message.strip()
+    message_lower = message.lower()
     
     client = get_cloud_client()
     
-    # Simple intent detection
-    if any(word in message for word in ['job', 'find', 'search', 'looking']):
-        return await handle_job_search(message)
+    # Check if user is sharing a resume
+    if request.resume_text or is_resume_text(message):
+        return await handle_resume_analysis(request.resume_text or message, client)
     
-    if any(word in message for word in ['resume', 'parse', 'analyze']):
+    # Intent detection with professional responses
+    if any(word in message_lower for word in ['hello', 'hi', 'hey', 'start', 'help']):
+        if format_professional_response:
+            return ChatResponse(
+                response=format_professional_response("welcome"),
+                tool_used="personality"
+            )
+    
+    if any(word in message_lower for word in ['job', 'find', 'search', 'looking', 'opportunity']):
+        return await handle_job_search_professional(message, client)
+    
+    if any(word in message_lower for word in ['resume', 'cv', 'analyze my']):
         return ChatResponse(
-            response="📄 **Resume Analysis**\n\nTo analyze your resume, please use the /resume endpoint with your resume text, or paste it here and I'll extract key information.",
+            response="""I'd be happy to analyze your resume and provide strategic insights.
+
+Please share your resume text, and I'll give you:
+• A clear picture of your **core strengths**
+• Insights into your **career trajectory**
+• **Actionable recommendations** for improvement
+• Opportunities that align with your background
+
+Simply paste your resume content, and let's take a look together.""",
             tool_used="resume_parser"
         )
     
-    if any(word in message for word in ['salary', 'pay', 'compensation', 'earn']):
-        return await handle_salary_query(message)
+    if any(word in message_lower for word in ['salary', 'pay', 'compensation', 'worth', 'earn']):
+        return await handle_salary_professional(message, client)
     
-    if any(word in message for word in ['cover letter', 'cover', 'letter']):
-        return ChatResponse(
-            response="✉️ **Cover Letter Generator**\n\nTo generate a cover letter, I need:\n• Job title\n• Company name\n• Job description\n\nUse the /cover-letter endpoint with these details.",
-            tool_used="cover_letter"
-        )
+    if any(word in message_lower for word in ['cover letter', 'application letter']):
+        if format_professional_response:
+            return ChatResponse(
+                response=format_professional_response("cover_letter"),
+                tool_used="cover_letter"
+            )
     
-    if any(word in message for word in ['interview', 'prepare', 'question']):
-        return await handle_interview_prep(message)
+    if any(word in message_lower for word in ['interview', 'prepare', 'question']):
+        if format_professional_response:
+            return ChatResponse(
+                response=format_professional_response("interview_prep"),
+                tool_used="interview_prep"
+            )
     
-    # General response via LLM
+    # Use LLM with CYNO personality for general queries
     if client:
         try:
-            result = client.generate_text(
-                f"You are CYNO, an AI job search assistant. Respond helpfully to: {request.message}",
-                max_tokens=500
-            )
+            prompt = f"""{CYNO_SYSTEM_PROMPT}
+
+User message: {message}
+
+Respond as CYNO, providing helpful, professional career guidance. Be specific, insightful, and action-oriented."""
+            
+            result = client.generate_text(prompt, max_tokens=600, temperature=0.7)
             if result.success:
-                return ChatResponse(response=result.result)
+                return ChatResponse(
+                    response=result.result,
+                    tool_used="llm_brain"
+                )
         except Exception as e:
             print(f"LLM error: {e}")
     
+    # Professional fallback
     return ChatResponse(
-        response=f"I understand you're asking about \"{request.message}\". I can help with:\n\n• 🔍 Job Search\n• 📄 Resume Analysis\n• ✉️ Cover Letters\n• 💰 Salary Estimates\n• 🎯 Interview Prep\n\nPlease be more specific about what you need!"
+        response="""I appreciate you reaching out. To give you the most relevant guidance, could you tell me more about what you're looking to accomplish?
+
+I'm here to help with:
+• **Career Strategy** — Understanding your goals and mapping a path forward
+• **Resume Analysis** — Identifying your strengths and how to present them
+• **Job Search** — Finding opportunities that truly fit your profile
+• **Interview Preparation** — Walking in confident and prepared
+• **Salary Negotiation** — Understanding your market value
+
+What's top of mind for you right now?"""
     )
 
-async def handle_job_search(query: str):
-    """Handle job search queries"""
-    # Extract keywords
-    keywords = []
-    for word in ['python', 'javascript', 'react', 'ml', 'ai', 'data', 'backend', 'frontend', 'remote']:
-        if word in query:
-            keywords.append(word)
-    
-    return ChatResponse(
-        response=f"""🔍 **Job Search Results**
+def is_resume_text(text: str) -> bool:
+    """Detect if the message appears to be resume content"""
+    resume_indicators = [
+        'experience', 'education', 'skills', 'work history',
+        'objective', 'summary', 'professional', 'bachelor',
+        'master', 'university', 'responsibilities', 'achievements',
+        'python', 'javascript', 'developer', 'engineer', 'manager',
+        'years of experience', 'proficient in', 'expertise in'
+    ]
+    text_lower = text.lower()
+    matches = sum(1 for indicator in resume_indicators if indicator in text_lower)
+    # If 4+ indicators and text is substantial, likely a resume
+    return matches >= 4 and len(text) > 300
 
-Based on your query, here are some matching opportunities:
-
-1. **Senior Python Developer** - Google (Remote)
-   💰 $180,000 - $250,000 | ⭐ 95% match
-
-2. **ML Engineer** - OpenAI (San Francisco)
-   💰 $200,000 - $300,000 | ⭐ 88% match
-
-3. **Backend Developer** - Stripe (Remote)
-   💰 $150,000 - $200,000 | ⭐ 85% match
-
-Keywords detected: {', '.join(keywords) if keywords else 'general search'}
-
-Would you like me to:
-• Analyze your fit for any of these roles?
-• Generate a cover letter?
-• Prepare for interviews?""",
-        tool_used="job_search",
-        data={"keywords": keywords, "results_count": 3}
-    )
-
-async def handle_salary_query(query: str):
-    """Handle salary estimation queries"""
-    client = get_cloud_client()
+async def handle_resume_analysis(resume_text: str, client):
+    """Analyze resume with professional insights"""
+    parsed_data = None
     
     if client:
         try:
-            from tools.discovery_tools import SalaryEstimatorTool
-            tool = SalaryEstimatorTool()
-            result = tool.execute(
-                job_title="Software Engineer",
-                location="Remote USA",
-                experience_level="Mid"
-            )
-            if 'estimates' in result:
-                return ChatResponse(
-                    response=f"💰 **Salary Estimate**\n\n{json.dumps(result['estimates'], indent=2)}",
-                    tool_used="salary_estimator",
-                    data=result
-                )
+            result = client.parse_resume(resume_text)
+            if result.success:
+                parsed_data = result.result
         except Exception as e:
-            print(f"Salary tool error: {e}")
+            print(f"Resume parse error: {e}")
     
+    # Generate insights
+    if format_professional_response:
+        from agent.personality import analyze_resume_insights
+        insights = analyze_resume_insights(parsed_data)
+    else:
+        insights = {}
+    
+    # Extract key info for personalized response
+    skills = parsed_data.get("skills", []) if parsed_data else []
+    experience = parsed_data.get("total_experience_years", 0) if parsed_data else 0
+    
+    # Build personalized response
+    if skills:
+        top_skills = skills[:3]
+        skill_analysis = f"**{', '.join(top_skills)}**"
+    else:
+        skill_analysis = "**technical problem-solving and project delivery**"
+    
+    response = f"""I've carefully reviewed your background, and I can see you have a compelling professional story.
+
+**What stands out to me:**
+Based on your experience, you excel at {skill_analysis}. This combination is particularly valuable in today's market.
+
+**Your career trajectory:**
+{insights.get('career_pattern', "You're at an interesting point in your career where strategic moves can have significant impact.")}
+
+**Key observations:**
+• Your technical foundation is solid—this opens doors to multiple paths
+• I notice patterns that suggest you thrive in environments that challenge you
+• There's an opportunity to better highlight your unique value proposition
+
+**My recommendations:**
+1. Quantify your achievements—numbers make impact tangible
+2. Lead with your differentiators, not just your responsibilities
+3. Consider how your projects tell a story of growth
+
+Would you like me to:
+• Find job opportunities that match your strengths?
+• Help you craft a more compelling resume narrative?
+• Prepare you for interviews at specific companies?"""
+
     return ChatResponse(
-        response="""💰 **Salary Estimate**
-
-Based on market data:
-
-• **Junior (0-2 yrs)**: $70,000 - $95,000
-• **Mid-level (2-5 yrs)**: $95,000 - $140,000
-• **Senior (5+ yrs)**: $140,000 - $200,000
-• **Staff/Principal**: $180,000 - $300,000
-
-Factors affecting salary:
-• Location (Remote vs On-site)
-• Company size & funding
-• Specialized skills (ML, Cloud, etc.)""",
-        tool_used="salary_estimator"
+        response=response,
+        tool_used="resume_analyzer",
+        data=parsed_data,
+        insights=insights
     )
 
-async def handle_interview_prep(query: str):
-    """Handle interview preparation queries"""
+async def handle_job_search_professional(query: str, client):
+    """Handle job search with professional insights"""
+    
+    response = """I'd be happy to help you find the right opportunities. But first, let me understand what you're really looking for.
+
+**A few strategic questions:**
+1. What type of work genuinely energizes you?
+2. Are you looking for growth, stability, compensation, or work-life balance?
+3. Any specific companies or industries you're drawn to?
+
+**Based on current market trends:**
+The job market is dynamic right now. Roles in **Python development**, **ML/AI**, and **cloud infrastructure** are seeing particularly strong demand. Remote opportunities remain robust, though some companies are increasing on-site expectations.
+
+**My approach:**
+Rather than overwhelming you with listings, I prefer to identify 3-5 opportunities that genuinely align with your goals and have a realistic path to success.
+
+Tell me a bit more about what you're looking for—or share your resume and I'll suggest roles that match your actual strengths."""
+
     return ChatResponse(
-        response="""🎯 **Interview Preparation**
+        response=response,
+        tool_used="job_search",
+        data={"status": "gathering_context"}
+    )
 
-I can help you prepare with:
+async def handle_salary_professional(query: str, client):
+    """Handle salary queries with professional insights"""
+    
+    if format_professional_response:
+        response = format_professional_response("salary_query", {"role": "Software Engineer", "location": "the US market"})
+    else:
+        response = """Let me give you the real picture on compensation.
 
-**Behavioral Questions**
-• "Tell me about a challenging project"
-• "How do you handle conflicts?"
+**Market Reality:**
+Salaries vary significantly based on company stage, location, and your specific skill stack. Here's what I'm seeing:
 
-**Technical Questions**
-• Data structures & algorithms
-• System design basics
-• Language-specific questions
+• **Entry Level (0-2 yrs)**: $70,000 - $95,000
+• **Mid-Senior (3-7 yrs)**: $110,000 - $160,000
+• **Senior/Lead (7+ yrs)**: $150,000 - $220,000
+• **Staff/Principal**: $200,000 - $350,000+
 
-**Project Deep-Dive**
-Share your GitHub profile and I'll generate questions about your actual projects.
+**Key factors that move the needle:**
+• Big Tech vs. Startups (significant difference)
+• Specialized skills (ML, Cloud, Security)
+• Negotiation strategy and timing
 
-What area would you like to focus on?""",
-        tool_used="interview_prep"
+Would you like me to help you understand where you specifically should be targeting?"""
+
+    return ChatResponse(
+        response=response,
+        tool_used="salary_advisor"
     )
 
 @app.post("/resume")
 async def parse_resume(request: ResumeRequest):
-    """Parse and analyze a resume"""
+    """Parse and analyze a resume with professional insights"""
     client = get_cloud_client()
     
     if client:
         try:
             result = client.parse_resume(request.resume_text)
             if result.success:
+                # Add professional insights
+                if format_professional_response:
+                    from agent.personality import analyze_resume_insights
+                    insights = analyze_resume_insights(result.result)
+                else:
+                    insights = {}
+                
                 return {
                     "success": True,
                     "data": result.result,
+                    "insights": insights,
                     "backend": result.backend
                 }
         except Exception as e:
@@ -274,15 +362,25 @@ async def generate_cover_letter(request: CoverLetterRequest):
     """Generate a personalized cover letter"""
     client = get_cloud_client()
     
+    prompt = f"""{CYNO_SYSTEM_PROMPT}
+
+Generate a compelling cover letter for:
+- Position: {request.job_title}
+- Company: {request.company}
+- Key Skills: {', '.join(request.skills)}
+- Job Description: {request.job_description}
+
+Write a professional, engaging cover letter that:
+1. Opens with a hook that shows genuine interest
+2. Connects specific skills to the role requirements
+3. Demonstrates understanding of the company
+4. Closes with a confident call to action
+
+Keep it concise (3-4 paragraphs) and authentic."""
+    
     if client:
         try:
-            result = client.generate_cover_letter(
-                job_title=request.job_title,
-                company=request.company,
-                job_description=request.job_description,
-                skills=request.skills,
-                experience_years=3
-            )
+            result = client.generate_text(prompt, max_tokens=800, temperature=0.7)
             if result.success:
                 return {
                     "success": True,
@@ -296,7 +394,7 @@ async def generate_cover_letter(request: CoverLetterRequest):
 
 @app.post("/salary")
 async def estimate_salary(request: SalaryRequest):
-    """Estimate salary for a role"""
+    """Estimate salary with professional insights"""
     try:
         from tools.discovery_tools import SalaryEstimatorTool
         tool = SalaryEstimatorTool()
@@ -305,14 +403,20 @@ async def estimate_salary(request: SalaryRequest):
             location=request.location,
             experience_level=request.experience_level
         )
+        
+        # Add professional context
+        result["advice"] = f"""Based on current market data for {request.job_title} roles in {request.location}, 
+here's my analysis. Remember, these ranges are starting points for negotiation—your specific background 
+and the company's situation can significantly impact the final offer."""
+        
         return {"success": True, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
-    init_tools()
-    print("🚀 Starting CYNO API Server...")
+    print("🚀 Starting CYNO API Server v2.0...")
     print("📍 API: http://localhost:8000")
     print("📖 Docs: http://localhost:8000/docs")
+    print("🎭 Personality: Senior Career Strategist")
     uvicorn.run(app, host="0.0.0.0", port=8000)
