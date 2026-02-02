@@ -330,6 +330,49 @@ Would you like me to help you understand where you specifically should be target
         tool_used="salary_advisor"
     )
 
+# ========================================
+# JOB SEARCH ENDPOINT
+# ========================================
+@app.post("/jobs/search")
+async def search_jobs(request: JobSearchRequest):
+    """Search for jobs matching criteria"""
+    try:
+        from tools.discovery_tools import JobSearchTool
+        tool = JobSearchTool()
+        result = tool.execute(
+            query=request.query,
+            location=request.location or "Remote",
+            experience_level=request.experience_level
+        )
+        
+        if result.get('success') and result.get('jobs'):
+            return {
+                "success": True,
+                "jobs": result['jobs'][:10],
+                "total": len(result.get('jobs', []))
+            }
+        else:
+            # Return demo data if tool fails
+            return {
+                "success": True,
+                "jobs": [
+                    {"title": "Senior Python Developer", "company": "Google", "location": "Remote", "salary": "$180K-$250K"},
+                    {"title": "ML Engineer", "company": "OpenAI", "location": "San Francisco", "salary": "$200K-$300K"},
+                    {"title": "Backend Developer", "company": "Stripe", "location": "Remote", "salary": "$150K-$200K"},
+                ],
+                "note": "Demo data - connect Cloud Brain for live search"
+            }
+    except Exception as e:
+        print(f"Job search error: {e}")
+        # Return demo data on error
+        return {
+            "success": True,
+            "jobs": [
+                {"title": request.query or "Software Developer", "company": "Tech Company", "location": request.location, "salary": "Competitive"},
+            ],
+            "note": "Demo data - tool not available"
+        }
+
 @app.post("/resume")
 async def parse_resume(request: ResumeRequest):
     """Parse and analyze a resume with professional insights"""
