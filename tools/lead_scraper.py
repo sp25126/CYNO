@@ -1,8 +1,11 @@
+"""
+Lead generation tool using advanced search techniques (dorking) and scraping.
+Focuses on finding direct email contacts and recent needs based on resume skills.
+"""
 import logging
 import requests
 import re
 import random
-import time
 from typing import List, Dict
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -76,56 +79,28 @@ class LeadScraperTool:
                 dorks.append(f'site:news.ycombinator.com "hiring" "{skill}"') # HackerNews
                 dorks.append(f'site:dev.to "looking for {skill}" "contact"')
                 
-                # 2. Tech Blogs/Platforms (Expanded)
+                # 2. Tech Blogs/Platforms
                 dorks.append(f'site:medium.com "hiring" "{skill} developer" email')
                 dorks.append(f'site:hashnode.com "hiring" "{skill}"')
                 dorks.append(f'site:substack.com "hiring" "{skill}"')
-                dorks.append(f'site:dev.to "looking for {skill}" "contact"')
                 
-                # 3. Creator Economy & Crowdfunding
+                # 3. Creator Economy
                 dorks.append(f'site:gumroad.com "looking for {skill}"')
                 dorks.append(f'site:patreon.com "hiring" "{skill}"')
-                dorks.append(f'site:kickstarter.com "hiring" "{skill}"')
-                dorks.append(f'site:indiegogo.com "hiring" "{skill}"')
                 
-                # 4. Startup & Co-founder (Expanded)
+                # 4. Startup & Co-founder
                 dorks.append(f'site:cofounderslab.com "looking for {skill}"')
                 dorks.append(f'site:wellfound.com "hiring" "{skill}"')
-                dorks.append(f'site:ycombinator.com "hiring" "{skill}"')
-                dorks.append(f'site:producthunt.com "hiring" "{skill}"')
-                dorks.append(f'site:betalist.com "hiring" "{skill}"')
                 
                 # 5. Remote Boards (Targeted)
                 dorks.append(f'site:remoteok.com "hiring" "{skill}"')
                 dorks.append(f'site:workingnomads.com "hiring" "{skill}"')
                 dorks.append(f'site:weworkremotely.com "hiring" "{skill}"')
-                dorks.append(f'site:upwork.com "looking for {skill}"')
-                dorks.append(f'site:freelancer.com "looking for {skill}"')
                 
-                # 6. Social Media Deep Dives
-                dorks.append(f'site:twitter.com "hiring {skill}" "dm open"')
-                dorks.append(f'site:twitter.com "looking for {skill}" "email me"')
-                dorks.append(f'site:linkedin.com/in "hiring {skill}" "email me"') # Profiles
-                dorks.append(f'site:linkedin.com/posts "hiring {skill}" "@gmail.com"') # Posts
-                dorks.append(f'site:facebook.com "hiring {skill} developer"')
-                dorks.append(f'site:instagram.com "hiring {skill}" "dm"')
-                dorks.append(f'site:threads.net "hiring {skill}"')
-                
-                # 7. Code Repos & Issues
-                dorks.append(f'site:github.com "looking for contributors" "{skill}"')
-                dorks.append(f'site:github.com "hiring" "{skill}"')
-                dorks.append(f'site:gitlab.com "hiring" "{skill}"')
-                
-                # 8. Unconventional
-                dorks.append(f'site:craigslist.org "hiring" "{skill}"')
-                dorks.append(f'site:gumtree.com "hiring" "{skill}"')
-                dorks.append(f'site:notion.site "hiring" "{skill}"') # Public notion pages
-                
-                # 9. Design/Frontend specifics
+                # 6. Design/Frontend (if applicable)
                 if any(x in skill.lower() for x in ['design', 'ui', 'ux', 'frontend', 'react', 'css']):
                     dorks.append(f'site:behance.net "hiring" "{skill}"')
                     dorks.append(f'site:dribbble.com "hiring" "{skill}"')
-                    dorks.append(f'site:awwwards.com "hiring" "{skill}"')
 
         return list(set(dorks)) # Deduplicate
 
@@ -140,55 +115,39 @@ class LeadScraperTool:
         
         # Use DDGS for dorking
         with DDGS() as ddgs:
-            # Boosted limits: Check up to 50 dorks, targeting 30 results each
-            for i, dork in enumerate(dorks[:50]): 
+            for dork in dorks[:10]: # Run top 10 generated dorks
                 if len(leads) >= limit: break
                 
-                # Retry logic for rate limits
-                for attempt in range(3):
-                    try:
-                        self.logger.info(f"Running dork ({i+1}): {dork}")
-                        # Increased max_results to 30
-                        results = ddgs.text(dork, max_results=30)
-                        if results:
-                            found_in_dork = 0
-                            for r in results:
-                                body = r.get('body', '') + " " + r.get('title', '')
-                                emails = self._extract_emails(body)
-                                
-                                # Valid Lead if we found an email and it looks relevant
-                                if emails:
-                                    email = emails[0]
-                                    # Basic filtering to avoid junk
-                                    if any(x in email for x in ['example.com', 'domain.com', 'wix']): continue
-                                    
-                                    pain_points = self._determine_pain_points(body, resume_skills)
-                                    
-                                    lead = Lead(
-                                        company="Unknown / Independent",
-                                        source=f"Web Search ({dork})",
-                                        role_needed=f"Developer ({resume_skills[0]})",
-                                        contact_email=email,
-                                        pain_points=pain_points,
-                                        profile_match=f"Matched on keywords found in search",
-                                        url=r.get('href'),
-                                        confidence_score=0.75 
-                                    )
-                                    leads.append(lead)
-                                    found_in_dork += 1
+                try:
+                    self.logger.info(f"Running dork: {dork}")
+                    results = ddgs.text(dork, max_results=10)
+                    if results:
+                        for r in results:
+                            body = r.get('body', '') + " " + r.get('title', '')
+                            emails = self._extract_emails(body)
                             
-                            self.logger.debug(f"Dork yielded {found_in_dork} leads.")
-                        
-                        break # Success, move to next dork
-                        
-                    except Exception as e:
-                        # Handle Rate Limits
-                        wait = 5 + (2 ** attempt)
-                        self.logger.warning(f"Dork failed: {e}. Sleeping {wait}s...")
-                        time.sleep(wait)
-                
-                # Politeness delay between dorks
-                time.sleep(1)
+                            # Valid Lead if we found an email and it looks relevant
+                            if emails:
+                                email = emails[0]
+                                # Basic filtering to avoid junk
+                                if any(x in email for x in ['example.com', 'domain.com', 'wix']): continue
+                                
+                                pain_points = self._determine_pain_points(body, resume_skills)
+                                
+                                lead = Lead(
+                                    company="Unknown / Independent",
+                                    source=f"Web Search ({dork})",
+                                    role_needed=f"Developer ({resume_skills[0]})",
+                                    contact_email=email,
+                                    pain_points=pain_points,
+                                    profile_match=f"Matched on keywords found in search",
+                                    url=r.get('href'),
+                                    confidence_score=0.75 # Decent since email found in "hiring" context
+                                )
+                                leads.append(lead)
+                                
+                except Exception as e:
+                    self.logger.warning(f"Dork search failed: {e}")
                     
         self.logger.info(f"Generated {len(leads)} leads via dorking.")
         return leads

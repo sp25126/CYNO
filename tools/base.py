@@ -1,21 +1,16 @@
-"""
-CYNO Base Tool Classes
-Provides base classes for all CYNO tools.
-"""
+from abc import ABC, abstractmethod
+from typing import Any, Dict
 
+class JobAgentTool(ABC):
+    """Base class ensuring tool independence."""
+    
+    def __init__(self, config: Dict[str, Any] = None):
+        self.config = config or {}
 
-class JobAgentTool:
-    """Base class for all CYNO job agent tools."""
-    
-    name: str = "base_tool"
-    description: str = "Base tool class"
-    
-    def execute(self, *args, **kwargs):
-        """Execute the tool. Override in subclasses."""
-        raise NotImplementedError("Subclasses must implement execute()")
-    
-    def __str__(self):
-        return f"<{self.__class__.__name__}>"
-    
-    def __repr__(self):
-        return self.__str__()
+    @abstractmethod
+    async def execute(self, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def validate_input(self, **kwargs) -> bool:
+        pass

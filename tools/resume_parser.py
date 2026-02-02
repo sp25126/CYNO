@@ -87,62 +87,103 @@ class ResumeParserTool:
     
     def _llm_extract_detailed(self, text: str) -> Dict[str, Any]:
         """
-        Cloud-first LLM extraction using EnhancedCloudClient.
-        Same functionality on Cloud or Local - only speed differs.
+        Cloud-first LLM extraction with 3-tier fallback:
+        1. Try Cloud Brain (Colab GPU)
+        2. Try Local Ollama
+        3. Return empty structure
         """
-        # Try Enhanced Cloud Client (handles Cloud/Local automatically)
+        # Try Cloud Brain first
         try:
-            from cloud.enhanced_client import get_cloud_client
+            from cloud.cloud_client import get_client
             
-            client = get_cloud_client()
-            result = client.parse_resume(text)
-            
-            if result.success and result.result:
-                logger.info("enhanced_parsing_success", 
-                           backend=result.backend, 
-                           time=result.time_seconds)
-                
-                data = result.result
-                return {
-                    'projects': data.get('projects', [])[:5],
-                    'certifications': data.get('certifications', [])[:5],
-                    'achievements': data.get('achievements', [])[:5],
-                    'soft_skills': data.get('soft_skills', [])[:5],
-                    'languages': data.get('languages_spoken', data.get('languages', []))[:3],
-                    'domains': data.get('domains', [])[:10],
-                    'work_experience': data.get('work_experience', [])[:3],
-                    'profile_type': data.get('profile_type', 'GENERAL'),
-                    'name': data.get('name', ''),
-                    'email': data.get('email', ''),
-                    'phone': data.get('phone', ''),
-                    'location': data.get('location', ''),
-                    'summary': data.get('summary', ''),
-                    'tech_stack': data.get('tech_stack', {}),
-                    'seniority_level': data.get('seniority_level', 'MID'),
-                    'ideal_roles': data.get('ideal_roles', []),
-                    'keywords': data.get('keywords', []),
-                    '_backend': result.backend,
-                    '_time_seconds': result.time_seconds
-                }
-            else:
-                logger.warning("enhanced_parsing_failed", error=result.error)
+            client = get_client()
+            if client.server_url:
+                try:
+                    result = client.parse_resume(text)
+                    logger.info("cloud_parsing_success", fields=len(result))
+                    return result
+                except Exception as e:
+                    logger.warning("cloud_failed_fallback_local", error=str(e))
         except ImportError:
-            logger.debug("enhanced_client_not_available")
-        except Exception as e:
-            logger.warning(f"enhanced_client_error: {e}")
+            logger.debug("cloud_client_not_available")
         
-        # Fallback: Return basic structure
-        logger.info("using_basic_extraction_fallback")
-        return {
-            'projects': [],
-            'certifications': [],
-            'achievements': [],
-            'soft_skills': [],
-            'languages': [],
-            'domains': [],
-            'work_experience': [],
-            'profile_type': 'GENERAL'
-        }
+        # Fallback to local Ollama (Phase-5 logic)
+        try:
+            from langchain_ollama import ChatOllama
+            import json
+            
+            llm = ChatOllama(model="gemma2:2b", base_url="http://localhost:11434", temperature=0)
+            
+            prompt = f"""You are an expert resume analyzer. Extract detailed information and return ONLY valid JSON with these exact keys:
+
+{{
+  "projects": ["list of notable projects with tech used"],
+  "certifications": ["list of certifications/credentials"],
+  "achievements": ["key accomplishments with metrics if available"],
+  "soft_skills": ["leadership, communication, teamwork, etc."],
+  "languages": ["English", "Spanish", etc.],
+  "domains": ["SPECIFIC technical domains: AI/ML, Web Development, Cloud, DevOps, Mobile, Data Science, etc."],
+  "work_experience": [
+    {{
+      "role": "job title",
+      "company": "company name",
+      "duration": "timeframe",
+      "key_tech": ["main technologies used"]
+    }}
+  ],
+  "profile_type": "MOST SPECIFIC: AI_ML_ENGINEER, WEB_DEVELOPER, FULLSTACK_ENGINEER, DATA_SCIENTIST, DEVOPS_ENGINEER, SOFTWARE_ENGINEER, or GENERAL"
+}}
+
+CRITICAL RULES:
+1. Extract ONLY information explicitly stated in the resume
+2. For "domains": List ALL technical specializations found (AI, Web Dev, Cloud, etc.)
+3. For "work_experience": Extract up to 3 most recent roles with technologies
+4. For "profile_type": Choose the MOST SPECIFIC category based on skills and experience
+5. Do NOT hallucinate - if unsure, use empty list []
+6. Return pure JSON only, no markdown
+
+Resume Text:
+{text[:3000]}
+
+JSON:"""
+
+            response = llm.invoke(prompt)
+            content = response.content.strip()
+            
+            # Clean potential markdown formatting
+            if content.startswith("```json"):
+                content = content[7:]
+            if content.startswith("```"):
+                content = content[3:]
+            if content.endswith("```"):
+                content = content[:-3]
+            
+            parsed = json.loads(content.strip())
+            
+            # Validate and normalize structure
+            return {
+                'projects': parsed.get('projects', [])[:5],
+                'certifications': parsed.get('certifications', [])[:5],
+                'achievements': parsed.get('achievements', [])[:5],
+                'soft_skills': parsed.get('soft_skills', [])[:5],
+                'languages': parsed.get('languages', [])[:3],
+                'domains': parsed.get('domains', [])[:10],
+                'work_experience': parsed.get('work_experience', [])[:3],
+                'profile_type': parsed.get('profile_type', 'GENERAL')
+            }
+            
+        except Exception as e:
+            logger.warning(f"LLM extraction failed: {e}. Using fallback.")
+            return {
+                'projects': [],
+                'certifications': [],
+                'achievements': [],
+                'soft_skills': [],
+                'languages': [],
+                'domains': [],
+                'work_experience': [],
+                'profile_type': 'GENERAL'
+            }
 
     def _extract_skills(self, text: str) -> List[str]:
         # Expanded skill list (from Phase-5)
