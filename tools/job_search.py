@@ -456,9 +456,41 @@ class JobSearchTool:
         self.logger.info(f"Direct scraping total: {len(all_jobs)} jobs")
         return all_jobs
 
-    async def run_all(self, query: str, limit: int = 150) -> List[Job]:
+    def execute(self, query: str, location: str = "Remote", experience_level: str = "Mid") -> Dict[str, Any]:
+        """
+        Execute the job search tool (Server Entry Point).
+        Wraps the scraping logic to return a standardized result dict.
+        """
+        try:
+            self.logger.info(f"Executing JobSearchTool: query='{query}', location='{location}'")
+            # Run the aggregation (synchronously)
+            jobs = self.run_all(query, limit=50) # Increased limit for production
+            
+            # Serialize jobs to dictionaries
+            jobs_data = []
+            for j in jobs:
+                if hasattr(j, 'dict'):
+                    jobs_data.append(j.dict())
+                else:
+                    jobs_data.append(j.__dict__)
+            
+            return {
+                "success": True,
+                "jobs": jobs_data,
+                "count": len(jobs_data)
+            }
+        except Exception as e:
+            self.logger.error(f"JobSearchTool execution failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "jobs": []
+            }
+
+    def run_all(self, query: str, limit: int = 150) -> List[Job]:
         """
         Master Aggregator: JobSpy + Reddit + PDF Sites (Hybrid)
+        (Converted to synchronous to run easier in simple server context)
         """
         from tools.job_lists import REMOTE_BOARDS, STARTUP_SITES, INTERNSHIP_SITES, FREELANCE_SITES, INDIA_SITES
         from tools.site_search import SiteSearchTool

@@ -21,8 +21,6 @@ var/
 *.egg
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -60,3 +58,38 @@ env.bak/
 .vscode/
 *.sublime-project
 *.sublime-workspace
+
+# =========================
+# CYNO SPECIFIC IGNORES
+# =========================
+
+# Configuration & Secrets
+config/settings.json
+config/cli_settings.json
+credentials.env
+credentials_template.env
+
+# User Data & Persistence
+data/
+resumes/
+emails/
+logs/
+leads/
+job_applications/
+archive/
+
+# Frontend Deps
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Temporary artifacts
+temp/
+tmp/
+*.log
+*.csv
+
+# Backup / Legacy Folders
+job_*
+jobTILL*
+*complete&working*
