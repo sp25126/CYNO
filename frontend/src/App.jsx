@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import './App.css'
+import './Settings.css'
+import Settings from './Settings'
 
 const TOOLS = [
   { id: 'chat', name: 'Chat with CYNO', icon: '💬' },
@@ -41,7 +43,9 @@ function App() {
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [activeTool, setActiveTool] = useState('chat')
-  const [isConnected, setIsConnected] = useState(true)
+  const [isConnected, setIsConnected] = useState(false)
+  const [gpuMode, setGpuMode] = useState('cloud')
+  const [showSettings, setShowSettings] = useState(false)
   const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
@@ -292,6 +296,20 @@ What's top of mind for you right now?`
     <>
       <div className="animated-bg"></div>
       <div className="app">
+        {/* Settings Modal */}
+        <Settings
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          onSave={(settings) => {
+            setGpuMode(settings.mode)
+            // Trigger reconnection check
+            fetch('http://localhost:8000/health')
+              .then(res => res.json())
+              .then(data => setIsConnected(data.api === 'healthy'))
+              .catch(() => setIsConnected(false))
+          }}
+        />
+
         {/* Header */}
         <header className="header">
           <div className="logo">
@@ -301,9 +319,14 @@ What's top of mind for you right now?`
               <span>AI CAREER STRATEGIST</span>
             </div>
           </div>
-          <div className="status-badge">
-            <div className={`status-dot ${isConnected ? '' : 'offline'}`}></div>
-            <span>{isConnected ? 'Cloud Brain Online' : 'Demo Mode'}</span>
+          <div className="header-right">
+            <div className="status-badge">
+              <div className={`status-dot ${isConnected ? '' : 'offline'}`}></div>
+              <span>{isConnected ? (gpuMode === 'cloud' ? '☁️ Cloud Brain' : '💻 Local GPU') : '⚡ Demo Mode'}</span>
+            </div>
+            <button className="settings-btn" onClick={() => setShowSettings(true)}>
+              ⚙️
+            </button>
           </div>
         </header>
 

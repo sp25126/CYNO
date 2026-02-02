@@ -413,10 +413,90 @@ and the company's situation can significantly impact the final offer."""
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ========================================
+# SETTINGS ENDPOINTS
+# ========================================
+
+# Settings model
+class SettingsRequest(BaseModel):
+    mode: str = "cloud"  # "cloud" or "local"
+    ngrok_url: Optional[str] = None
+    ollama_url: Optional[str] = "http://localhost:11434"
+    ollama_model: Optional[str] = "gemma2:2b"
+
+# Settings storage (persisted to file)
+SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "..", "config", "settings.json")
+
+def load_settings() -> dict:
+    """Load settings from file"""
+    try:
+        if os.path.exists(SETTINGS_FILE):
+            with open(SETTINGS_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Error loading settings: {e}")
+    return {
+        "mode": "cloud",
+        "ngrok_url": "",
+        "ollama_url": "http://localhost:11434",
+        "ollama_model": "gemma2:2b"
+    }
+
+def save_settings(settings: dict):
+    """Save settings to file"""
+    try:
+        os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=2)
+    except Exception as e:
+        print(f"Error saving settings: {e}")
+
+@app.get("/settings")
+async def get_settings():
+    """Get current GPU settings"""
+    return load_settings()
+
+@app.post("/settings")
+async def update_settings(request: SettingsRequest):
+    """Update GPU settings and ngrok URL"""
+    global _cloud_client
+    
+    settings = {
+        "mode": request.mode,
+        "ngrok_url": request.ngrok_url or "",
+        "ollama_url": request.ollama_url or "http://localhost:11434",
+        "ollama_model": request.ollama_model or "gemma2:2b"
+    }
+    
+    # Save to file for persistence
+    save_settings(settings)
+    
+    # Update environment variable for cloud client
+    if request.ngrok_url:
+        os.environ['COLAB_SERVER_URL'] = request.ngrok_url
+        # Reset cloud client to use new URL
+        _cloud_client = None
+    
+    # Update ollama settings
+    if request.mode == "local":
+        os.environ['OLLAMA_URL'] = request.ollama_url or "http://localhost:11434"
+        os.environ['OLLAMA_MODEL'] = request.ollama_model or "gemma2:2b"
+    
+    return {
+        "success": True,
+        "message": f"Settings updated. Mode: {request.mode}",
+        "settings": settings
+    }
+
 if __name__ == "__main__":
     import uvicorn
+    # Load saved settings on startup
+    saved = load_settings()
+    if saved.get('ngrok_url'):
+        os.environ['COLAB_SERVER_URL'] = saved['ngrok_url']
     print("🚀 Starting CYNO API Server v2.0...")
     print("📍 API: http://localhost:8000")
     print("📖 Docs: http://localhost:8000/docs")
     print("🎭 Personality: Senior Career Strategist")
+    print(f"⚙️ GPU Mode: {saved.get('mode', 'cloud')}")
     uvicorn.run(app, host="0.0.0.0", port=8000)
